@@ -2,13 +2,15 @@ import numpy as np
 import copy
 import linkedlist
 import math
-class tablero:
+import random
+class SimulatedAnnealing:
     # Ej Tablero [0,1,2,3,4,5,6,7]
     def __init__(self, arreglo):
         self.arreglo = arreglo
         self.maximo = len(self.arreglo) - 1
         self.menor = math.factorial(len(arreglo))
         self.heuristica = self.calculoH(self.arreglo)
+        self.i = 1
         # Agregamos las reinas en el tablero
         self.ponerReinas(self.arreglo)
         self.pares = {}
@@ -17,9 +19,37 @@ class tablero:
 
         self.printTablero()
         print("H principal = " , self.calculoH(self.arreglo))
-        self.calculoHs(self.arreglo)
-
+        x = self.simulatedannealing()
+        self.ponerReinas(x)
+        self.printTablero()
+        print("H = ", self.calculoH(x))
+        print("Se ha resuelto el tablero en ", self.i, " pasos")
         #self.printTablero()
+    def simulatedannealing(self):
+        current = self.arreglo
+        next = None
+        while(True):
+            if (self.calculoH(current) == 0):
+                return current
+            next = self.randomSuccesor(current)
+            deltaE = self.calculoH(next) -self.calculoH(current)
+            if (deltaE > 0):
+                current = next
+            else:
+                if (math.exp(deltaE / self.i) > random.randint(0, 1)):
+                    current = next
+            self.i = self.i + 1
+    def randomSuccesor(self,array):
+        # Tomamos un indice aleatorio del arreglo
+        ind = random.randint(0,len(array)-1)
+        # Ahora le asignamos un valor distinto al indice
+        x = array[ind]
+        p = x
+        while (p == x):
+            p = random.randint(0, len(array)-1)
+        array[ind] = p
+        return array
+
     def ponerReinas(self,arreglo):
         self.tablero = np.zeros((len(arreglo), len(arreglo)))
         for i in range(0, len(arreglo)):
@@ -71,16 +101,15 @@ class tablero:
            if (abs(arreglo[k]-arreglo[i]) == abs(k-i)):
                h = h + 1
        return h
-
     def printTablero(self):
-        for a in range(0, self.maximo + 1):
-            for b in range(0, self.maximo + 1):
+        for a in range(0, self.maximo+1):
+            for b in range(0, self.maximo+1):
                 if (self.tablero[a][b] == -1):
                     print("\33[31m♕\033[0m", end=' ')
-                elif (self.tablero[a][b] == 0 and (a + b) % 2 == 0):
+                elif (self.tablero[a][b] == 0 and (a+b)%2 == 0):
                     print("\033[33m⬛\033[0m", end=' ')
-                elif (self.tablero[a][b] == 0 and (a + b) % 2 == 1):
+                elif (self.tablero[a][b] == 0 and (a+b)%2 == 1):
                     print("\033[30m⬜\033[0m", end=' ')
                 else:
-                    print("%2d" % int(self.tablero[a][b]), end=' ')
+                    print("%2d"%int(self.tablero[a][b]), end=' ')
             print("")
