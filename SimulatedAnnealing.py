@@ -3,9 +3,11 @@ import copy
 import linkedlist
 import math
 import random
+import time
 class SimulatedAnnealing:
     # Ej Tablero [0,1,2,3,4,5,6,7]
     def __init__(self, arreglo):
+        self.segundos = time.time()
         self.arreglo = arreglo
         self.maximo = len(self.arreglo) - 1
         self.menor = math.factorial(len(arreglo))
@@ -14,6 +16,8 @@ class SimulatedAnnealing:
         # Agregamos las reinas en el tablero
         self.ponerReinas(self.arreglo)
         self.pares = {}
+        self.segundos2 = time.time()
+        self.i2 = 1
         for i in range(0, len(arreglo)):
             self.pares[i] = linkedlist.LinkedList()
 
@@ -24,21 +28,30 @@ class SimulatedAnnealing:
         self.printTablero()
         print("H = ", self.calculoH(x))
         print("Se ha resuelto el tablero en ", self.i, " pasos")
+        print("La solución se ha completado en ", time.time() - self.segundos, " segundos")
         #self.printTablero()
     def simulatedannealing(self):
         current = self.arreglo
         next = None
         while(True):
-            if (self.calculoH(current) == 0):
+            currentH = self.calculoH(current)
+
+            if (currentH == 0):
                 return current
+            if (currentH < self.menor):
+                self.menor = currentH
+                self.segundos2 = time.time()
+                self.i2 = self.i
             next = self.randomSuccesor(current)
-            deltaE = self.calculoH(next) -self.calculoH(current)
+            deltaE = self.calculoH(next) - currentH
             if (deltaE > 0):
                 current = next
             else:
                 if (math.exp(deltaE / self.i) > random.randint(0, 1)):
                     current = next
             self.i = self.i + 1
+            #print(self.calculoH(current))
+            print(self.menor , " en " , self.segundos2 - self.segundos, " en " , self.i2 , " pasos")
     def randomSuccesor(self,array):
         # Tomamos un indice aleatorio del arreglo
         ind = random.randint(0,len(array)-1)
